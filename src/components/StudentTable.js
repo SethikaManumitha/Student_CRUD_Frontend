@@ -30,16 +30,10 @@ const StudentTable = ({ students, setStudents, setEditStudent }) => {
   
   const handleSearch = (event) => {
     const searchValue = event.target.value.toLowerCase();
-    if (searchValue === '') {
-      setStudents(students); 
-      return;
-    }else{
-      const filteredStudents = students.filter((student) =>
-        student.nic.toLowerCase().includes(searchValue)
-      );
-      setStudents(filteredStudents);
-    }
-   
+    const filteredStudents = students.filter((student) =>
+      student.nic.toLowerCase().includes(searchValue)
+    );
+    setStudents(filteredStudents);
   }
   const handleDeleteStudent = async (nic) => {
     try {

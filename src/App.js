@@ -1,38 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import './App.css';
-import StudentForm from './components/StudentForm';
-import StudentTable from './components/StudentTable';
-import { getAllStudents } from './config/axiosConfig';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import HomePage from './HomePage';
+import StudentPage from './StudentPage';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import NavigationBar from './components/NavigationBar';
 
 function App() {
-  const [students, setStudents] = useState([]); 
-  const [editStudent, setEditStudent] = useState();
-
-  useEffect(() => {
-    fetchStudents();
-  }, []);
-
-  const fetchStudents = async () => {
-    try {
-      const response = await getAllStudents();
-      setStudents(response.data); 
-    } catch (error) {
-      console.error('Error: ' + error);
-      alert('Error fetching students. Please try again later.');
-    }
-  };
-
+  
   return (
     <div className="App">
-      <div className="container">
-      <StudentForm fetchStudents={fetchStudents} editStudent={editStudent} setEditStudent={setEditStudent} />
-      </div>
-      <br />
-      <StudentTable students={students} setStudents={setStudents} setEditStudent={setEditStudent} />
-      <ToastContainer position="top-right" autoClose={3000} />
-
+      <Router>
+      <NavigationBar />
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/students" element={<StudentPage />} />
+      </Routes>
+    </Router>
     </div>
   );
 }
