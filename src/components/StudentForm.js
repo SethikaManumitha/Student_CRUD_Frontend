@@ -11,19 +11,19 @@ const StudentForm = ({ fetchStudents,editStudent }) => {
     phoneNumber: '',
   });
 
-  const [errors, setErrors] = useState([]);
+  const [errors, setErrors] = useState({nic: '', phoneNumber: ''});
   
   const validateForm = () => {
-    const newErros = [];
+    const newErros = {};
     if (student.nic.length < 10) {
-      newErros.push('NIC must be at least 10 characters long');
+      newErros.nic ='*NIC must be at least 10 characters long';
     }
     if (!/^\d{10}$/.test(student.phoneNumber)) {
-      newErros.push('Phone number must be 10 digits');
+      newErros.phoneNumber = '*Phone number must be 10 digits';
     }
 
     setErrors(newErros);
-    return newErrors.length === 0;
+    return newErros.length === 0;
   }
   useEffect(() => {
     if (editStudent) {
@@ -44,6 +44,8 @@ const StudentForm = ({ fetchStudents,editStudent }) => {
           await addStudent(student);
           toast.success('Student added successfully!');
         }
+      }else{
+        toast.warn("Please fill the form correctly");
       }
      
       fetchStudents();
