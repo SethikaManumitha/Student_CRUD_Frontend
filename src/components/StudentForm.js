@@ -7,14 +7,24 @@ import './StudentForm.css';
 const StudentForm = ({ fetchStudents,editStudent }) => {
   const [student, setStudent] = useState({
     nic: '',
-    firstName: '',
-    lastName: '',
-    gender: '',
     dob: '',
     phoneNumber: '',
-    email: '',
   });
 
+  const [errors, setErrors] = useState([]);
+  
+  const validateForm = () => {
+    const newErros = [];
+    if (student.nic.length < 10) {
+      newErros.push('NIC must be at least 10 characters long');
+    }
+    if (!/^\d{10}$/.test(student.phoneNumber)) {
+      newErros.push('Phone number must be 10 digits');
+    }
+
+    setErrors(newErros);
+    return newErrors.length === 0;
+  }
   useEffect(() => {
     if (editStudent) {
       setStudent(editStudent);
@@ -24,15 +34,18 @@ const StudentForm = ({ fetchStudents,editStudent }) => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      if (editStudent) {
-        await updateStudent(editStudent.nic, student);
-        toast.success('Student updated successfully!');
-
-      } else {
-        await addStudent(student);
-        toast.success('Student added successfully!');
-      }
+     
+      if (validateForm()) {
+        if (editStudent) {
+          await updateStudent(editStudent.nic, student);
+          toast.success('Student updated successfully!');
   
+        } else {
+          await addStudent(student);
+          toast.success('Student added successfully!');
+        }
+      }
+     
       fetchStudents();
       setStudent({
         nic: '',
@@ -56,6 +69,7 @@ const StudentForm = ({ fetchStudents,editStudent }) => {
       ...prevStudent,
       [name]: value,
     }));
+    setErrors({ ...errors, [name]: '' });
   };
 
   return (
@@ -75,6 +89,7 @@ const StudentForm = ({ fetchStudents,editStudent }) => {
             required
           />
           </Form.Group>
+          {errors.nic && <p style={{ color: 'red' }}>{errors.nic}</p>}
         </div>
       </div>
        
@@ -166,6 +181,7 @@ const StudentForm = ({ fetchStudents,editStudent }) => {
             required
           />
         </Form.Group>
+        {errors.phoneNumber && <p style={{ color: 'red' }}>{errors.phoneNumber}</p>}
         </div>
       </div>
 

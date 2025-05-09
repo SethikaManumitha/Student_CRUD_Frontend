@@ -4,11 +4,12 @@ import StudentTable from './components/StudentTable';
 import { getAllStudents } from './config/axiosConfig';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { toast } from 'react-toastify';
 
 function StudentPage() {
   const [students, setStudents] = useState([]);
   const [editStudent, setEditStudent] = useState();
-
+  const [allStudents, setAllStudents] = useState([]);
   useEffect(() => {
     fetchStudents();
   }, []);
@@ -17,11 +18,13 @@ function StudentPage() {
     try {
       const response = await getAllStudents();
       setStudents(response.data);
+      setAllStudents(response.data); 
     } catch (error) {
       console.error('Error: ' + error);
-      alert('Error fetching students. Please try again later.');
+      toast.error('Error fetching students. Please try again later.');
     }
   };
+  
 
   return (
     <div className="App">
@@ -37,6 +40,7 @@ function StudentPage() {
         students={students}
         setStudents={setStudents}
         setEditStudent={setEditStudent}
+        allStudents={allStudents}
       />
       <ToastContainer position="top-right" autoClose={3000} />
     </div>

@@ -7,10 +7,9 @@ import Form from 'react-bootstrap/Form';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
 
-const StudentTable = ({ students, setStudents, setEditStudent }) => {
+const StudentTable = ({ students, setStudents, setEditStudent,allStudents }) => {
 
   const [count,setCount] = useState(0);
-
   const handleSort = () => {
     setCount((prevCount) => {
       const newCount = prevCount + 1;
@@ -30,11 +29,17 @@ const StudentTable = ({ students, setStudents, setEditStudent }) => {
   
   const handleSearch = (event) => {
     const searchValue = event.target.value.toLowerCase();
-    const filteredStudents = students.filter((student) =>
+  
+    if (searchValue.length === 0) {
+      return;
+    }
+  
+    const filteredStudents = allStudents.filter((student) =>
       student.nic.toLowerCase().includes(searchValue)
     );
     setStudents(filteredStudents);
-  }
+  };
+  
   const handleDeleteStudent = async (nic) => {
     try {
       await deleteStudent(nic);
@@ -54,17 +59,15 @@ const StudentTable = ({ students, setStudents, setEditStudent }) => {
       
       <div className="row">
       
-        <div className="col-md-10">
+          <span style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Form.Control
               type="text"
               name="nic"
               placeholder="Enter NIC"
               onChange={handleSearch}
             />
-        </div>
-        <div className="col-md-2">
-          <Button variant="success" onClick={handleSort}><FontAwesomeIcon icon={count % 2 == 0 ? faSortAlphaAsc : faSortAlphaDesc}></FontAwesomeIcon></Button>
-        </div>
+        <Button variant="success" onClick={handleSort}><FontAwesomeIcon icon={count % 2 == 0 ? faSortAlphaAsc : faSortAlphaDesc}></FontAwesomeIcon></Button>
+        </span>
       </div>
       <br />
       <Table striped bordered hover responsive>

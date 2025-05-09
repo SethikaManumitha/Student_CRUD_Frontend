@@ -15,8 +15,8 @@ const NavigationBar = () => {
   return (
    <Navbar className='navbar'>
       <Container>
-        <Button variant="outline-primary" onClick={goBack}>
-            <FontAwesomeIcon icon={faChevronLeft} />
+        <Button className='btnBack' onClick={goBack}>
+            <FontAwesomeIcon icon={faChevronLeft} color='blue' />
         </Button>
         <Navbar.Brand className="mx-auto"><h1><b>Student Management System</b></h1></Navbar.Brand>
       </Container>
