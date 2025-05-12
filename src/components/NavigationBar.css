@@ -1,20 +1,12 @@
+.logout-btn {
+  position: absolute;
+  right: 20px;
+  top: 15px;
+  color: white;
+  border-color: white;
+}
+
 .navbar{
+    background-color: rgb(255, 255, 255);
     margin-bottom: 20px;
 }
-
-.btnBack {
-    border: none;
-    background-color: transparent;
-    color: #0d6efd; 
-    transition: all 0.3s ease-in-out;
-    padding: 5px 10px;
-    border-radius: 5px;
-}
-
-.btnBack:hover {
-    cursor: pointer;
-    border: 1px solid #0d6efd;
-    background-color: rgba(13, 110, 253, 0.1); 
-    color: #0d6efd;
-}
-
