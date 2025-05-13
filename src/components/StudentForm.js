@@ -1,54 +1,89 @@
-import React, { useState,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Form, Button } from 'react-bootstrap';
-import { addStudent,updateStudent } from '../config/axiosConfig';
+import { addStudent, updateStudent } from '../config/axiosConfig';
 import { toast } from 'react-toastify';
 import './StudentForm.css';
 
-const StudentForm = ({ fetchStudents,editStudent }) => {
+const StudentForm = ({ fetchStudents, editStudent }) => {
+
   const [student, setStudent] = useState({
     nic: '',
+    firstName: '',
+    lastName: '',
+    gender: '',
     dob: '',
+    phoneNumber: '',
+    email: '',
+  });
+
+  const [errors, setErrors] = useState({
+    nic: '',
     phoneNumber: '',
   });
 
-  const [errors, setErrors] = useState({nic: '', phoneNumber: ''});
-  
-  const validateForm = () => {
-    const newErros = {};
-    if (student.nic.length < 10) {
-      newErros.nic ='*NIC must be at least 10 characters long';
-    }
-    if (!/^\d{10}$/.test(student.phoneNumber)) {
-      newErros.phoneNumber = '*Phone number must be 10 digits';
-    }
-
-    setErrors(newErros);
-    return newErros.length === 0;
-  }
+  // Load student data into form if editing
   useEffect(() => {
     if (editStudent) {
       setStudent(editStudent);
     }
   }, [editStudent]);
 
+  // Handle changes in form inputs
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+
+    setStudent((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: '',
+    }));
+  };
+
+  // Form validation
+  const validateForm = () => {
+    const validationErrors = {};
+
+    if (student.nic.trim().length < 10) {
+      validationErrors.nic = '*NIC must be at least 10 characters long';
+    }
+
+    if (!/^\d{10}$/.test(student.phoneNumber)) {
+      validationErrors.phoneNumber = '*Phone number must be exactly 10 digits';
+    }
+
+    // Set any validation errors
+    setErrors(validationErrors);
+
+    return Object.keys(validationErrors).length === 0;
+  };
+
+  // Handle form submission
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    if (!validateForm()) {
+      toast.warn('Please correct the errors in the form');
+      return;
+    }
+
     try {
-     
-      if (validateForm()) {
-        if (editStudent) {
-          await updateStudent(editStudent.nic, student);
-          toast.success('Student updated successfully!');
-  
-        } else {
-          await addStudent(student);
-          toast.success('Student added successfully!');
-        }
-      }else{
-        toast.warn("Please fill the form correctly");
+      // Decide whether to add or update
+      if (editStudent) {
+        await updateStudent(editStudent.nic, student);
+        toast.success('Student updated successfully!');
+      } else {
+        await addStudent(student);
+        toast.success('Student added successfully!');
       }
-     
+
+      // Refresh the list
       fetchStudents();
+
+      // Clear the form
       setStudent({
         nic: '',
         firstName: '',
@@ -58,47 +93,37 @@ const StudentForm = ({ fetchStudents,editStudent }) => {
         phoneNumber: '',
         email: '',
       });
-    } catch (error) {
-      console.error('Error:', error);
-      toast.error('Error saving student. Please try again later.');
-    }
-  };
-  
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setStudent((prevStudent) => ({
-      ...prevStudent,
-      [name]: value,
-    }));
-    setErrors({ ...errors, [name]: '' });
+    } catch (error) {
+      console.error('Error saving student:', error);
+      toast.error('Please try again later.');
+    }
   };
 
   return (
     <Form className="mb-4" onSubmit={handleSubmit}>
-        
-        
       <div className="row">
         <div className="col-md-12">
           <Form.Group className="mb-2">
-          <Form.Label>NIC</Form.Label>
-          <Form.Control
-            type="text"
-            name="nic"
-            placeholder="Enter NIC"
-            value={student.nic}
-            onChange={handleChange}
-            required
-          />
+            <Form.Label>NIC</Form.Label>
+            <Form.Control
+              type="text"
+              name="nic"
+              placeholder="Enter NIC"
+              value={student.nic}
+              onChange={handleChange}
+              required
+            />
           </Form.Group>
-          {errors.nic && <p style={{ color: 'red' }}>{errors.nic}</p>}
+          {errors.nic && <p className="text-danger">{errors.nic}</p>}
         </div>
       </div>
-       
+
+    
       <div className="row">
         <div className="col-md-6">
           <Form.Group className="mb-2">
-          <Form.Label>First Name</Form.Label>
+            <Form.Label>First Name</Form.Label>
             <Form.Control
               type="text"
               name="firstName"
@@ -109,8 +134,8 @@ const StudentForm = ({ fetchStudents,editStudent }) => {
             />
           </Form.Group>
         </div>
-          
-        <div className="col-md-6">  
+
+        <div className="col-md-6">
           <Form.Group className="mb-2">
             <Form.Label>Last Name</Form.Label>
             <Form.Control
@@ -125,39 +150,40 @@ const StudentForm = ({ fetchStudents,editStudent }) => {
         </div>
       </div>
 
-     <div className="row">
-      <div className="col-md-6">
-      <Form.Group className="mb-2">
-        <Form.Label>DOB</Form.Label>
-        <Form.Control
-          type="date"
-          name="dob"
-          value={student.dob}
-          onChange={handleChange}
-          required
-        />
-      </Form.Group>
+     
+      <div className="row">
+        <div className="col-md-6">
+          <Form.Group className="mb-2">
+            <Form.Label>Date of Birth</Form.Label>
+            <Form.Control
+              type="date"
+              name="dob"
+              value={student.dob}
+              onChange={handleChange}
+              required
+            />
+          </Form.Group>
+        </div>
 
+        <div className="col-md-6">
+          <Form.Group className="mb-2">
+            <Form.Label>Email</Form.Label>
+            <Form.Control
+              type="email"
+              name="email"
+              placeholder="Enter Email"
+              value={student.email}
+              onChange={handleChange}
+              required
+            />
+          </Form.Group>
+        </div>
       </div>
-      <div className="col-md-6">
-      <Form.Group className="mb-2">
-        <Form.Label>Email</Form.Label>
-        <Form.Control
-          type="email"
-          name="email"
-          placeholder="Enter Email"
-          value={student.email}
-          onChange={handleChange}
-          required
-        />
-      </Form.Group>
-      </div>
-     </div>
 
      
       <div className="row">
         <div className="col-md-6">
-            <Form.Group className="mb-2">
+          <Form.Group className="mb-2">
             <Form.Label>Gender</Form.Label>
             <Form.Select
               name="gender"
@@ -171,36 +197,35 @@ const StudentForm = ({ fetchStudents,editStudent }) => {
             </Form.Select>
           </Form.Group>
         </div>
+
         <div className="col-md-6">
           <Form.Group className="mb-2">
-          <Form.Label>Phone Number</Form.Label>
-          <Form.Control
-            type="text"
-            name="phoneNumber"
-            placeholder="Enter Phone Number"
-            value={student.phoneNumber}
-            onChange={handleChange}
-            required
-          />
-        </Form.Group>
-        {errors.phoneNumber && <p style={{ color: 'red' }}>{errors.phoneNumber}</p>}
+            <Form.Label>Phone Number</Form.Label>
+            <Form.Control
+              type="text"
+              name="phoneNumber"
+              placeholder="Enter Phone Number"
+              value={student.phoneNumber}
+              onChange={handleChange}
+              required
+            />
+          </Form.Group>
+          {errors.phoneNumber && (
+            <p className="text-danger">{errors.phoneNumber}</p>
+          )}
         </div>
       </div>
 
-      
-      
-     <div className="row">
-      <div className="col-md-12">
-      <Form.Group className="mb-2">
-        <Button variant="primary" type="submit" name='btnSubmit' className="custom-submit-btn">
-          Submit
-        </Button>
-      </Form.Group>
+ 
+      <div className="row">
+        <div className="col-md-12">
+          <Form.Group className="mb-2">
+            <Button variant="primary" type="submit" className="custom-submit-btn">
+              {editStudent ? 'Update Student' : 'Add Student'}
+            </Button>
+          </Form.Group>
+        </div>
       </div>
-     </div>
-
-     
-
     </Form>
   );
 };

@@ -1,75 +1,77 @@
-import React from 'react';
-import { Table, Button } from 'react-bootstrap';
+import React, { useState } from 'react';
+import { Table, Button, Form } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit, faTrash,faSortAlphaAsc,faSortAlphaDesc } from '@fortawesome/free-solid-svg-icons';
+import { faEdit, faTrash, faSortAlphaAsc, faSortAlphaDesc } from '@fortawesome/free-solid-svg-icons';
 import { deleteStudent } from '../config/axiosConfig';
-import Form from 'react-bootstrap/Form';
-import { useState } from 'react';
 import { toast } from 'react-toastify';
 
-const StudentTable = ({ students, setStudents, setEditStudent,allStudents }) => {
+const StudentTable = ({ students, setStudents, setEditStudent, allStudents }) => {
 
-  const [count,setCount] = useState(0);
+  // Track sorting toggle count
+  const [sortCount, setSortCount] = useState(0); 
+
+  // Toggle sort between ascending and descending order 
   const handleSort = () => {
-    setCount((prevCount) => {
-      const newCount = prevCount + 1;
-      const sortedStudents = [...students].sort((a, b) => {
+    setSortCount(prev => {
+      const newCount = prev + 1;
+      const isAscending = newCount % 2 === 1;
+
+      const sorted = [...students].sort((a, b) => {
         const nameA = a.firstName.toLowerCase();
         const nameB = b.firstName.toLowerCase();
-        if (newCount % 2 === 1) {
-          return nameA.localeCompare(nameB);
-        } else {
-          return nameB.localeCompare(nameA);
-        }
+        return isAscending ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
       });
-      setStudents(sortedStudents);
+
+      setStudents(sorted);
       return newCount;
     });
   };
-  
-  const handleSearch = (event) => {
-    const searchValue = event.target.value.toLowerCase();
-  
-    if (searchValue.length === 0) {
+
+  // Filter students by NIC value during typing
+  const handleSearch = (e) => {
+    const query = e.target.value.toLowerCase();
+
+    if (!query) {
+      setStudents(allStudents);
       return;
     }
-  
-    const filteredStudents = allStudents.filter((student) =>
-      student.nic.toLowerCase().includes(searchValue)
+
+    const filtered = allStudents.filter(student =>
+      student.nic.toLowerCase().includes(query)
     );
-    setStudents(filteredStudents);
+    setStudents(filtered);
   };
-  
+
+  // Delete a student by NIC and update table
   const handleDeleteStudent = async (nic) => {
     try {
       await deleteStudent(nic);
-      
-      // Fecth students without the deleted one  
-      setStudents((prevStudents) => prevStudents.filter(student => student.nic !== nic)); 
-
+      setStudents(prev => prev.filter(student => student.nic !== nic));
       toast.success('Student deleted successfully!');
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Delete error:', error);
       toast.error('Error deleting student. Please try again later.');
     }
   };
 
   return (
     <div className="container">
-      
-      <div className="row">
-      
-          <span style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Form.Control
-              type="text"
-              name="nic"
-              placeholder="Enter NIC"
-              onChange={handleSearch}
-            />
-        <Button variant="success" onClick={handleSort}><FontAwesomeIcon icon={count % 2 == 0 ? faSortAlphaAsc : faSortAlphaDesc}></FontAwesomeIcon></Button>
-        </span>
+      {/* Search and Sort Row */}
+      <div className="row mb-3">
+        <div className="d-flex justify-content-between align-items-center">
+          <Form.Control
+            type="text"
+            placeholder="Search by NIC"
+            onChange={handleSearch}
+            className="me-2"
+          />
+          <Button variant="success" onClick={handleSort}>
+            <FontAwesomeIcon icon={sortCount % 2 === 0 ? faSortAlphaAsc : faSortAlphaDesc} />
+          </Button>
+        </div>
       </div>
-      <br />
+
+      {/* Students Table */}
       <Table striped bordered hover responsive>
         <thead>
           <tr>
@@ -84,15 +86,16 @@ const StudentTable = ({ students, setStudents, setEditStudent,allStudents }) => 
             <th>Delete</th>
           </tr>
         </thead>
+
         <tbody>
           {students.length === 0 ? (
             <tr>
-              <td colSpan="9" className="text-center">
-                No students found
+              <td colSpan="9" className="text-center text-muted">
+                No students found.
               </td>
             </tr>
           ) : (
-            students.map((student) => (
+            students.map(student => (
               <tr key={student.nic}>
                 <td>{student.nic}</td>
                 <td>{student.firstName}</td>
@@ -102,12 +105,20 @@ const StudentTable = ({ students, setStudents, setEditStudent,allStudents }) => 
                 <td>{student.email}</td>
                 <td>{student.dob}</td>
                 <td>
-                  <Button variant="primary" onClick={() => setEditStudent(student)}>
+                  <Button
+                    variant="primary"
+                    onClick={() => setEditStudent(student)}
+                    aria-label={`Edit ${student.firstName}`}
+                  >
                     <FontAwesomeIcon icon={faEdit} />
                   </Button>
                 </td>
                 <td>
-                  <Button variant="danger" onClick={() => handleDeleteStudent(student.nic)}>
+                  <Button
+                    variant="danger"
+                    onClick={() => handleDeleteStudent(student.nic)}
+                    aria-label={`Delete ${student.firstName}`}
+                  >
                     <FontAwesomeIcon icon={faTrash} />
                   </Button>
                 </td>

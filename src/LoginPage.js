@@ -14,6 +14,7 @@ const LoginPage = () => {
     password: '',
   });
 
+  // Handle changes in form inputs
   const handleChange = (event) => {
     const { name, value } = event.target;
     setAdmin((prevAdmin) => ({
@@ -22,7 +23,8 @@ const LoginPage = () => {
     }));
   }
 
-    const handleSubmit = async (event) => {
+  // Handle form submission
+   const handleSubmit = async (event) => {
         event.preventDefault();
         try {
             const response = await login(admin.email, admin.password);
@@ -37,9 +39,9 @@ const LoginPage = () => {
         }
     };
 
-
-  
+  // Redirect to home page on successful login
   const navigate = useNavigate();
+
   return (
     <div>
         <div className="row page">
